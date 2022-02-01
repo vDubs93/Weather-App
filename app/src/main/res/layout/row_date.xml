@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/sunIcon"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:contentDescription="@null"
+        android:src="@drawable/sun"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="64dp"
+        android:layout_height="72dp"
+        android:gravity="start|center_vertical"
+        app:layout_constraintStart_toEndOf="@id/sunIcon"
+        app:layout_constraintTop_toTopOf="@id/sunIcon"
+        android:textColor="@color/black"
+        tools:text="Jan 01"
+        />
+
+
+
+    <TextView
+        android:id="@+id/Temp"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+
+        android:gravity="start|center_vertical"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/date"
+        app:layout_constraintTop_toTopOf="@id/date"
+        tools:text="Temp: 00°" />
+
+
+
+    <TextView
+        android:id="@+id/high"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:gravity="start|center_vertical"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/date"
+        app:layout_constraintTop_toBottomOf="@id/Temp"
+        tools:text="High: 00°"
+        />
+
+
+    <TextView
+        android:id="@+id/low"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:gravity="start|center_vertical"
+        android:textColor="@color/black"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toEndOf="@id/high"
+        app:layout_constraintTop_toBottomOf="@id/Temp"
+        tools:text="Low: 00°"
+        />
+
+    <TextView
+        android:id="@+id/sunrise"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginStart="12dp"
+        android:gravity="start|center_vertical"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@+id/low"
+        app:layout_constraintTop_toTopOf="@+id/Temp"
+        tools:text="Sunrise: " />
+
+    <TextView
+        android:id="@+id/sunset"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+
+        android:gravity="start|center_vertical"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="@+id/sunrise"
+        app:layout_constraintTop_toBottomOf="@+id/sunrise"
+        tools:text="Sunset: " />
+</androidx.constraintlayout.widget.ConstraintLayout>
