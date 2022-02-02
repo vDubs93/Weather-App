@@ -32,24 +32,26 @@ class MyAdapter(private val data: List<DayForecast>) : RecyclerView.Adapter<MyAd
             val riseTime = LocalDateTime.ofInstant(riseInstant,ZoneId.systemDefault())
             val setInstant = Instant.ofEpochSecond(data.sunset)
             val setTime = LocalDateTime.ofInstant(setInstant,ZoneId.systemDefault())
+            LocalDateTime.ofInstant(setInstant,ZoneId.systemDefault())
 
             val temp = data.temp.day
             val high = data.temp.max
             val low = data.temp.min
-            tempView.text = "Temp: " + (temp).toString() + "°"
-            highView.text = "High: " + (high).toString() + "°"
-            lowView.text = "Low: " + (low).toString() + "°"
-            sunriseView.text = "Sunrise: " + timeFormatter.format(riseTime)
-            sunsetView.text = "Sunset: " + timeFormatter.format(setTime)
+
+            tempView.text = tempView.context.getString(R.string.temp, temp)
+            highView.text = highView.context.getString(R.string.forecastHigh, high)
+            lowView.text = lowView.context.getString(R.string.forecastLow, low)
+            sunriseView.text = sunriseView.context.getString(R.string.sunrise,timeFormatter.format(riseTime))
+            sunsetView.text = sunsetView.context.getString(R.string.sunset,timeFormatter.format(setTime))
         }
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.row_date, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: MyAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(data[position])
     }
 
