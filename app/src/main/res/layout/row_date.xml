@@ -72,20 +72,20 @@
         android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:gravity="start|center_vertical"
         android:textColor="@color/black"
-        app:layout_constraintStart_toEndOf="@+id/low"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/Temp"
-        tools:text="Sunrise: " />
+        tools:text="Sunrise: 00:00" />
 
     <TextView
         android:id="@+id/sunset"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
-
         android:gravity="start|center_vertical"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@+id/sunrise"
         app:layout_constraintTop_toBottomOf="@+id/sunrise"
-        tools:text="Sunset: " />
+        tools:text="Sunset: 00:00" />
 </androidx.constraintlayout.widget.ConstraintLayout>
