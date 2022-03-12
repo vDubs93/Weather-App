@@ -22,6 +22,7 @@ class ForecastActivity : AppCompatActivity() {
         binding = ActivityForecastBinding.inflate(layoutInflater)
         viewModel.loadData()
         setContentView(binding.root)
+
     }
 
     override fun onResume() {
