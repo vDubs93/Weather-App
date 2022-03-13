@@ -15,4 +15,11 @@
     <string name="forecastLow">Low: %1$d°</string>
     <string name="sunrise">Sunrise: %1$s</string>
     <string name="sunset">Sunset: %1$s</string>
+    <string name="apiKey">6d3cbb90efe05909395139d822e2357b</string>
+    <string name="zip_code">ZIP Code</string>
+    <string name="submit">Submit</string>
+    <string name="current_name">Current Weather Conditions</string>
+    <string name="search_name">Search</string>
+    <string name="invalid_zip_code">Error: ZIP Code not found</string>
+    <string name="ok">OK</string>
 </resources>
