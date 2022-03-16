@@ -1,20 +1,17 @@
 package com.example.weatherstation
 
-import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.android.car.ui.AlertDialogBuilder
-
 import com.example.weatherstation.databinding.FragmentSearchBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 @AndroidEntryPoint
 class SearchFragment: Fragment(R.layout.fragment_search) {
     private lateinit var binding: FragmentSearchBinding
@@ -24,7 +21,7 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         activity?.setTitle(R.string.search_name)
         binding = FragmentSearchBinding.inflate(layoutInflater)
@@ -32,13 +29,13 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
             binding.button.isEnabled = enable
         }
         binding.button.setOnClickListener{
-            try {
-                searchViewModel.loadData()
+            searchViewModel.loadData()
+            if (searchViewModel.navigate.value == true){
                 val currentConditions = searchViewModel.currentConditions.value!!
                 val action = SearchFragmentDirections.actionSearchFragmentToCurrentFragment(
                     currentConditions, binding.zipCode.text.toString())
                 findNavController().navigate(action)
-            } catch (e:retrofit2.HttpException) {
+            } else {
                 ZipErrorDialogFragment().show(childFragmentManager,ZipErrorDialogFragment.TAG)
             }
         }

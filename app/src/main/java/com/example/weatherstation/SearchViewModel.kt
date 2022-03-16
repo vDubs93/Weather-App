@@ -10,12 +10,13 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(private val service: Api) : ViewModel() {
     val currentConditions: MutableLiveData<CurrentConditions> = MutableLiveData()
     private var zipCode: String? = null
-
-    private val _enableButton = MutableLiveData<Boolean>(false)
+    private val _navigate = MutableLiveData(false)
+    private val _enableButton = MutableLiveData(false)
 
     val enableButton: LiveData<Boolean>
         get() = _enableButton
-
+    val navigate: LiveData<Boolean>
+        get() = _navigate
 
     fun updateZipCode(zipCode: String) {
         if(zipCode != this.zipCode){
@@ -28,10 +29,15 @@ class SearchViewModel @Inject constructor(private val service: Api) : ViewModel(
         return zipCode.length == 5 && zipCode.all {it.isDigit()}
     }
     fun loadData() = runBlocking {
-
-        launch { currentConditions.value = zipCode?.let { service.getCurrentConditions(it)
-        }}
-
-
+        launch {
+            try {
+                currentConditions.value = zipCode?.let {
+                service.getCurrentConditions(it)
+                }
+                _navigate.value = true
+            } catch (e:retrofit2.HttpException) {
+                _navigate.value = false
+            }
+        }
     }
 }
