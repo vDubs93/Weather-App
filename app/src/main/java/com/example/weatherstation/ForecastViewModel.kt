@@ -10,8 +10,8 @@ class ForecastViewModel @Inject constructor(private val service: Api) : ViewMode
 
     val forecastList: MutableLiveData<Forecast> = MutableLiveData()
 
-    fun loadData() = runBlocking {
-        launch { forecastList.value = service.getForecastConditions("55104") }
+    fun loadData(zipCode: String) = runBlocking {
+        launch { forecastList.value = service.getForecastConditions(zipCode) }
 
     }
 }

@@ -54,7 +54,6 @@ class MyAdapter(private val data: List<DayForecast>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RowDateViewHolder {
-        println("ViewHolder created")
         val view = RowDateBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
         return RowDateViewHolder(view)
