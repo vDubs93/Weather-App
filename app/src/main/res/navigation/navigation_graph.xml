@@ -17,6 +17,12 @@
         <argument
             android:name="zipCode"
             app:argType="string" />
+        <argument
+            android:name="lat"
+            app:argType="string" />
+        <argument
+            android:name="lon"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/forecastFragment"
@@ -24,6 +30,12 @@
         android:label="@string/forecast_name">
         <argument
             android:name="zipCode"
+            app:argType="string" />
+        <argument
+            android:name="lat"
+            app:argType="string" />
+        <argument
+            android:name="lon"
             app:argType="string" />
     </fragment>
     <fragment
@@ -33,6 +45,7 @@
         <action
             android:id="@+id/action_searchFragment_to_currentFragment"
             app:destination="@id/currentFragment" />
+
     </fragment>
 
 

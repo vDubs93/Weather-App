@@ -22,4 +22,7 @@
     <string name="search_name">Search</string>
     <string name="invalid_zip_code">Error: ZIP Code not found</string>
     <string name="ok">OK</string>
+    <string name="getLocal">Get Local Data</string>
+    <string name="location_permission_rationale">This application requires permission to use your phone\'s GPS location to provide user-relevant weather data.</string>
+    <string name="location_permission_denied">Location permissions required for automatic local weather data.</string>
 </resources>
