@@ -1,7 +1,5 @@
 package com.example.weatherstation
 
-import android.Manifest
-import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
@@ -22,14 +20,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), ActivityCompat.O
     @Inject
     lateinit var searchViewModel: SearchViewModel
     var requestingLocationUpdates: Boolean = false
+
     private var locationCallback = object: LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?){
+        override fun onLocationResult(locationResult: LocationResult){
             locationResult ?: return
             for (location in locationResult.locations){
-                print(location.latitude)
-                print(location.longitude)
+                println(location.latitude)
+                println(location.longitude)
                 searchViewModel.updateLatLon(location.latitude.toString(), location.longitude.toString())
             }
+            searchViewModel.loadData()
         }
 
     }
@@ -59,7 +59,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), ActivityCompat.O
     }
 
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
+        if (requestCode == 2) {
+            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                println("PermissionGranted")
+                requestingLocationUpdates = true
+            } else {
+                PermissionDeniedDialogFragment().show(supportFragmentManager, PermissionDeniedDialogFragment.TAG)
+            }
+        }
+    }
 
 }
 

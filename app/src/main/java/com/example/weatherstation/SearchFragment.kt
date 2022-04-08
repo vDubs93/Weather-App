@@ -2,7 +2,6 @@ package com.example.weatherstation
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -38,18 +37,16 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         binding.button.setOnClickListener{
             searchViewModel.loadData()
             if (searchViewModel.navigate.value == true){
-                val currentConditions = searchViewModel.currentConditions.value!!
-                val action = SearchFragmentDirections.actionSearchFragmentToCurrentFragment(
-                    currentConditions, binding.zipCode.text.toString(), "", "")
-                findNavController().navigate(action)
+                navigateToCurrent()
             } else {
                 ZipErrorDialogFragment().show(childFragmentManager, ZipErrorDialogFragment.TAG)
             }
         }
-        binding.button2.setOnClickListener{
-
+        binding.button2.setOnClickListener {
             requestLocationPermission()
-            println("requesting Permission")
+            if (searchViewModel.navigate.value == true) {
+                navigateToCurrent()
+            }
         }
         binding.zipCode.addTextChangedListener (
             object : TextWatcher {
@@ -70,6 +67,21 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         )
         return binding.root
     }
+
+    fun navigateToCurrent() {
+        val zip: String
+        if (searchViewModel.latLonSet)
+            zip = ""
+        else
+            zip = binding.zipCode.text.toString()
+
+        val currentConditions = searchViewModel.currentConditions.value!!
+        val action = SearchFragmentDirections.actionSearchFragmentToCurrentFragment(
+            currentConditions, zip, searchViewModel.lat, searchViewModel.lon
+        )
+        findNavController().navigate(action)
+    }
+
     private fun requestLocationPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)){
             showLocationPermissionRationale()
@@ -94,26 +106,6 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
             }
             .create()
             .show()
-    }
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        println("Checking Permission Result")
-        if (requestCode == 1) {
-            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                (activity as MainActivity).requestingLocationUpdates = true
-                searchViewModel.loadData()
-
-                val currentConditions = searchViewModel.currentConditions.value!!
-                val action = SearchFragmentDirections.actionSearchFragmentToCurrentFragment(
-                    currentConditions, "", searchViewModel.lat, searchViewModel.lon
-                )
-                findNavController().navigate(action)
-            }
-        }
     }
 }
 

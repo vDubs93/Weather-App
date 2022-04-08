@@ -18,6 +18,7 @@ class SearchViewModel @Inject constructor(private val service: Api) : ViewModel(
         get() = _enableButton
     val navigate: LiveData<Boolean>
         get() = _navigate
+    var latLonSet = false
     fun updateZipCode(zipCode: String) {
         if(zipCode != this.zipCode){
             this.zipCode = zipCode
@@ -27,20 +28,23 @@ class SearchViewModel @Inject constructor(private val service: Api) : ViewModel(
     fun updateLatLon(lat: String, lon: String){
         this.lat = lat
         this.lon = lon
+        println("lat $lat lon $lon")
+        latLonSet = true
+
     }
     private fun isValidZipCode(zipCode: String): Boolean {
         return zipCode.length == 5 && zipCode.all {it.isDigit()}
     }
     fun loadData() = runBlocking {
         launch {
-            if (lat != "" && lon != "") {
+            if (latLonSet) {
                 try {
                     currentConditions.value = service.getCurrentConditionsLatLon(lat, lon)
                     _navigate.value = true
                 } catch (e: retrofit2.HttpException) {
                     _navigate.value = false
                 }
-            } else {
+            } else if (isValidZipCode(zipCode.toString())){
                 try {
                     currentConditions.value = zipCode?.let {
                         service.getCurrentConditionsZip(it)
