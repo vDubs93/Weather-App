@@ -31,7 +31,6 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
     private lateinit var binding: FragmentSearchBinding
     @Inject
     lateinit var searchViewModel: SearchViewModel
-    private val REQUEST_LOCATION_ACCESS : Int = 2
     private lateinit var locationPermissionRequest: ActivityResultLauncher<Array<String>>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -52,7 +51,7 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
                     requestLocationUpdates()
                 }
                 else -> {
-                    // No location access granted.
+                    PermissionDeniedDialogFragment().show(childFragmentManager, PermissionDeniedDialogFragment.TAG)
                 }
             }
         }

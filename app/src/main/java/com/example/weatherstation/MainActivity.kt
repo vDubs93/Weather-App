@@ -23,34 +23,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), ActivityCompat.O
     lateinit var forecastViewModel: ForecastViewModel
     @Inject
     lateinit var searchViewModel: SearchViewModel
-
-    @SuppressLint("NewApi")
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-
-
-    }
-
-    @SuppressLint("Newapi")
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == 2) {
-            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                println("Permission Granted")
-            } else {
-                PermissionDeniedDialogFragment().show(supportFragmentManager, PermissionDeniedDialogFragment.TAG)
-            }
-        }
-    }
-
 }
 
