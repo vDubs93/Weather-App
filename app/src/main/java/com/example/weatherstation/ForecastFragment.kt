@@ -16,7 +16,7 @@ import javax.inject.Inject
 class ForecastFragment : Fragment(R.layout.fragment_forecast){
     private lateinit var recyclerView: RecyclerView
     private lateinit var binding: FragmentForecastBinding
-    private lateinit var zipCode: String
+
     @Inject
     lateinit var forecastViewModel: ForecastViewModel
     val args: ForecastFragmentArgs by navArgs()
@@ -27,8 +27,13 @@ class ForecastFragment : Fragment(R.layout.fragment_forecast){
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         activity?.setTitle(R.string.forecast_name)
-        zipCode = args.zipCode
-        forecastViewModel.loadData(zipCode)
+        val zipCode: String? = args.zipCode
+        val lat: String? = args.lat
+        val lon: String? = args.lon
+        if (lat == null)
+            forecastViewModel.loadData(zipCode)
+        else
+            forecastViewModel.loadData(lat, lon)
         binding = FragmentForecastBinding.inflate(layoutInflater)
         return binding.root
 

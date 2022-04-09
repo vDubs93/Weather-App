@@ -1,9 +1,13 @@
 package com.example.weatherstation
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
 import android.os.PersistableBundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
@@ -19,45 +23,18 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), ActivityCompat.O
     lateinit var forecastViewModel: ForecastViewModel
     @Inject
     lateinit var searchViewModel: SearchViewModel
-    var requestingLocationUpdates: Boolean = false
 
-    private var locationCallback = object: LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult){
-            locationResult ?: return
-            for (location in locationResult.locations){
-                println(location.latitude)
-                println(location.longitude)
-                searchViewModel.updateLatLon(location.latitude.toString(), location.longitude.toString())
-            }
-            searchViewModel.loadData()
-        }
-
-    }
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-
         super.onCreate(savedInstanceState, persistentState)
 
 
     }
+
+    @SuppressLint("Newapi")
     override fun onResume() {
         super.onResume()
-        if(requestingLocationUpdates) startLocationUpdates()
     }
-    fun startLocationUpdates() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        print("Got location")
-        try {
-            var locationRequest: LocationRequest = LocationRequest.create()
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
-
-        } catch (e: SecurityException){}
-    }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -68,8 +45,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), ActivityCompat.O
 
         if (requestCode == 2) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                println("PermissionGranted")
-                requestingLocationUpdates = true
+                println("Permission Granted")
             } else {
                 PermissionDeniedDialogFragment().show(supportFragmentManager, PermissionDeniedDialogFragment.TAG)
             }
