@@ -15,8 +15,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CurrentFragment : Fragment(R.layout.fragment_current
 ) {
-
-    private lateinit var zipCode: String
     private lateinit var binding: FragmentCurrentBinding
     @Inject
     lateinit var currentViewModel: CurrentViewModel
@@ -30,11 +28,12 @@ class CurrentFragment : Fragment(R.layout.fragment_current
         super.onCreateView(inflater, container, savedInstanceState)
         activity?.setTitle(R.string.current_name)
         currentConditions = args.currentConditions
-        zipCode = args.zipCode
+        val zipCode: String? = args.zipCode
+        val lat: String? = args.lat
+        val lon: String? = args.lon
         binding = FragmentCurrentBinding.inflate(layoutInflater)
         binding.forecastButton.setOnClickListener {
-            val zipCode: String = this.zipCode
-            val action = CurrentFragmentDirections.actionCurrentFragmentToForecastFragment(zipCode)
+            val action = CurrentFragmentDirections.actionCurrentFragmentToForecastFragment(zipCode, lat, lon)
             findNavController().navigate(action)
         }
         bindData(currentConditions)
