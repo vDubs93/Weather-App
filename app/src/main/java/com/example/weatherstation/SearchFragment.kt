@@ -34,6 +34,7 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
     private lateinit var locationPermissionRequest: ActivityResultLauncher<Array<String>>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var showingNotifications: Boolean = false
+    private var enableNotifications: Boolean = false
 
     @SuppressLint("newAPI")
 
@@ -85,9 +86,13 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         }
         binding.button3.setOnClickListener {
             if (!showingNotifications){
+                requestLocationPermission()
                 requestForegroundPermission()
+                val intent = Intent(this.context, WeatherNotificationService::class.java)
+                this.context?.startForegroundService(intent)
                 showingNotifications = true
                 binding.button3.text = getString(R.string.disableNotifications)
+
             } else {
                 this.context?.stopService(Intent(this.context, WeatherNotificationService::class.java))
                 showingNotifications = false
@@ -141,19 +146,22 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         ) {
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.FOREGROUND_SERVICE), 3)
         }
-        val intent = Intent(this.context, WeatherNotificationService::class.java)
-        this.context?.startForegroundService(intent)
+
 
     }
     private fun requestLocationUpdates() {
+        requestLocationPermission()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         if (ActivityCompat.checkSelfPermission(
-                requireActivity(),
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 2)
+            return
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationClient.lastLocation
             .addOnSuccessListener {
                 requestNewLocation()
@@ -161,13 +169,21 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
                     Log.d("SearchFragment", it.toString())
                     searchViewModel.updateLatLon(it.latitude, it.longitude)
                     searchViewModel.loadDataLatLon()
-
-                        navigateToCurrentLatLon()
-                    }
+                    navigateToCurrentLatLon()
+                }
 
             }
     }
+    private fun requestLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 2)
+        }
 
+    }
 
     private fun requestNewLocation() {
         val locationRequest = LocationRequest.create()

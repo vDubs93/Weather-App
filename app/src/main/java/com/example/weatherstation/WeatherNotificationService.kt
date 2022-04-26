@@ -6,6 +6,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
@@ -24,19 +25,36 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+import kotlin.concurrent.scheduleAtFixedRate
 
 class WeatherNotificationService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var latlon = DoubleArray(2)
-    private lateinit var notification: Notification
+    private var notification: Notification? = null
     private lateinit var api: Api
     private val timer = Timer()
+    private lateinit var locationCallback: LocationCallback
+    private val locationRequest = LocationRequest.create()
     private val currentConditions: MutableLiveData<CurrentConditions> = MutableLiveData()
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
     override fun onCreate() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.applicationContext)
+        locationRequest.interval = 180000L
+        locationRequest.fastestInterval = 180000L
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    println("Got new location")
+                    latlon[0] = location.latitude
+                    latlon[1] = location.longitude
+                    loadData()
+                    createNotification()
+                }
+            }
+        }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -46,33 +64,32 @@ class WeatherNotificationService : Service() {
         }
         fusedLocationClient.lastLocation
             .addOnSuccessListener {
-                latlon[0] = it.latitude
-                latlon[1] = it.longitude
+                println("Got last known location")
+
+                    latlon[0] = it.latitude
+                    latlon[1] = it.longitude
+
 
             }
-        api = provideApiService()
-        super.onCreate()
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
-
     @SuppressLint("NewApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
+        api = provideApiService()
         loadData()
 
         createNotificationChannel()
         createNotification()
-
-        //Because I couldn't get intervals to work with the location updates.  Not sure what's going on there.
-        timer.schedule(TimeUnit.MINUTES.toMillis(30)) {
-            requestNewLocation()
-        }
-        requestNewLocation()
         startForeground(9455, notification)
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy(){
-        timer.cancel()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
         super.onDestroy()
     }
     @SuppressLint("InlinedApi")
@@ -83,7 +100,7 @@ class WeatherNotificationService : Service() {
             getPendingIntent(0,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             }
-
+        loadData()
         notification = NotificationCompat.Builder(this, "WeatherUpdates")
             .setSmallIcon(R.drawable.sun)
             .setContentTitle(getText(R.string.notification_title))
@@ -97,7 +114,7 @@ class WeatherNotificationService : Service() {
             .setContentIntent(pendingIntent)
             .build()
         with(NotificationManagerCompat.from(this)) {
-            notify(9455, notification)
+            notify(9455, notification!!)
         }
     }
 
@@ -138,39 +155,4 @@ class WeatherNotificationService : Service() {
 
         return retrofit.create(Api::class.java)
     }
-
-    private fun requestNewLocation() {
-        val locationRequest = LocationRequest.create()
-        locationRequest.interval = 1000L
-        locationRequest.fastestInterval = 1000L
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    latlon[0] = location.latitude
-                    latlon[1] = location.longitude
-                    loadData()
-                    createNotification()
-                }
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
-    }
-
 }
