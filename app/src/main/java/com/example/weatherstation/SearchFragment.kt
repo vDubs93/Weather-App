@@ -2,12 +2,13 @@ package com.example.weatherstation
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import android.service.notification.StatusBarNotification
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -17,14 +18,13 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.weatherstation.databinding.FragmentSearchBinding
 import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 @AndroidEntryPoint
 class SearchFragment: Fragment(R.layout.fragment_search) {
@@ -33,6 +33,8 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
     lateinit var searchViewModel: SearchViewModel
     private lateinit var locationPermissionRequest: ActivityResultLauncher<Array<String>>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var showingNotifications: Boolean = false
+    private var enableNotifications: Boolean = false
 
     @SuppressLint("newAPI")
 
@@ -55,10 +57,21 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
                 }
             }
         }
+        val mNotificationManager = activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notifications = mNotificationManager.activeNotifications
+        for(notification in notifications)
+            showingNotifications = (notification.id == 9455)
+
+
         binding = FragmentSearchBinding.inflate(layoutInflater)
+        if (showingNotifications)
+            binding.button3.text = getString(R.string.disableNotifications)
+        else
+            binding.button3.text = getString(R.string.startNotifications)
         searchViewModel.enableButton.observe(viewLifecycleOwner) { enable ->
             binding.button.isEnabled = enable
         }
+
         binding.button.setOnClickListener{
             searchViewModel.loadDataZip()
             if (searchViewModel.navigate.value == true){
@@ -70,6 +83,21 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
 
         binding.button2.setOnClickListener {
             locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+        binding.button3.setOnClickListener {
+            if (!showingNotifications){
+                requestLocationPermission()
+                requestForegroundPermission()
+                val intent = Intent(this.context, WeatherNotificationService::class.java)
+                this.context?.startForegroundService(intent)
+                showingNotifications = true
+                binding.button3.text = getString(R.string.disableNotifications)
+
+            } else {
+                this.context?.stopService(Intent(this.context, WeatherNotificationService::class.java))
+                showingNotifications = false
+                binding.button3.text = getString(R.string.startNotifications)
+            }
         }
 
         binding.zipCode.addTextChangedListener (
@@ -91,6 +119,7 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         return binding.root
     }
 
+
     private fun navigateToCurrentZip() {
         val zip: String = binding.zipCode.text.toString()
         val currentConditions = searchViewModel.currentConditions.value!!
@@ -100,7 +129,7 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
         findNavController().navigate(action)
     }
 
-    fun navigateToCurrentLatLon() {
+    private fun navigateToCurrentLatLon() {
         val lat: Double? = searchViewModel.lat
         val lon: Double? = searchViewModel.lon
         val currentConditions = searchViewModel.currentConditions.value!!
@@ -108,23 +137,31 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
             currentConditions,null, lat.toString(), lon.toString())
         findNavController().navigate(action)
     }
-
-    private fun requestLocationUpdates() {
+    @SuppressLint("NewApi")
+    private fun requestForegroundPermission() {
         if (ActivityCompat.checkSelfPermission(
                 requireActivity(),
+                Manifest.permission.FOREGROUND_SERVICE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.FOREGROUND_SERVICE), 3)
+        }
+
+
+    }
+    private fun requestLocationUpdates() {
+        requestLocationPermission()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 2)
+            return
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationClient.lastLocation
             .addOnSuccessListener {
                 requestNewLocation()
@@ -132,18 +169,25 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
                     Log.d("SearchFragment", it.toString())
                     searchViewModel.updateLatLon(it.latitude, it.longitude)
                     searchViewModel.loadDataLatLon()
-
-                        navigateToCurrentLatLon()
-                    }
+                    navigateToCurrentLatLon()
+                }
 
             }
     }
+    private fun requestLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 2)
+        }
 
+    }
 
     private fun requestNewLocation() {
         val locationRequest = LocationRequest.create()
-        locationRequest.interval = 0L
-        locationRequest.fastestInterval = 0L
+        locationRequest.interval = 1800000L
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         val locationCallback = object : LocationCallback() {
@@ -176,5 +220,6 @@ class SearchFragment: Fragment(R.layout.fragment_search) {
             Looper.getMainLooper()
         )
     }
+
 }
 

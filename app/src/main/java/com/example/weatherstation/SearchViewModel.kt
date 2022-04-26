@@ -15,7 +15,9 @@ class SearchViewModel @Inject constructor(private val service: Api) : ViewModel(
     private val _navigate = MutableLiveData(false)
     private val _enableButton = MutableLiveData(false)
     private val _latLonSet = MutableLiveData(false)
-
+    private val _notificationButton = MutableLiveData(false)
+    val notificationButton: LiveData<Boolean>
+        get() = _notificationButton
     val enableButton: LiveData<Boolean>
         get() = _enableButton
     val navigate: LiveData<Boolean>
