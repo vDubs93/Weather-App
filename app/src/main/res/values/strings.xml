@@ -31,4 +31,6 @@
     <string name="disableNotifications">Disable Notifications</string>
     <string name="channel_description">Channel for weather updates</string>
     <string name="channel_name">WeatherUpdateChannel</string>
+    <string name="forecast_item_name">Forecast for %1$s</string>
+    <string name="wind_speed">Wind Speed: %1$d mph</string>
 </resources>

@@ -1,10 +1,13 @@
 package com.example.weatherstation
 
+import android.media.Image
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,8 +15,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherstation.databinding.FragmentForecastBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 @AndroidEntryPoint
-class ForecastFragment : Fragment(R.layout.fragment_forecast){
+class ForecastFragment : Fragment(R.layout.fragment_forecast), MyAdapter.OnItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var binding: FragmentForecastBinding
 
@@ -46,17 +50,16 @@ class ForecastFragment : Fragment(R.layout.fragment_forecast){
 
         recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = MyAdapter(listOf())
+        recyclerView.adapter = MyAdapter(listOf(), this)
         if (this::forecastViewModel.isInitialized)
             forecastViewModel.forecastList.observe(this) {
-                recyclerView.adapter = MyAdapter(it.list)
+                recyclerView.adapter = MyAdapter(it.list, this)
             }
 
     }
 
-    fun onClick() {
-        childFragmentManager.beginTransaction().apply{
-            childFragmentManager.popBackStack()
-        }
+    override fun onItemClicked(data: DayForecast){
+        val action = ForecastFragmentDirections.actionForecastFragmentToForecastItem(data)
+        findNavController().navigate(action)
     }
 }

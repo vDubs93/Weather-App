@@ -43,15 +43,28 @@
             android:name="lon"
             app:argType="string"
             app:nullable="true"/>
+        <action
+            android:id = "@+id/action_forecastFragment_to_forecastItem"
+            app:destination="@id/ForecastItemFragment"/>
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.example.weatherstation.SearchFragment"
         android:label="@string/search_name">
+
         <action
             android:id="@+id/action_searchFragment_to_currentFragment"
             app:destination="@id/currentFragment" />
 
+    </fragment>
+
+    <fragment
+        android:id="@+id/ForecastItemFragment"
+        android:name="com.example.weatherstation.ForecastItemFragment"
+        android:label="@string/forecast_item_name">
+        <argument
+            android:name="data"
+            app:argType="com.example.weatherstation.DayForecast"/>
     </fragment>
 
 
