@@ -12,5 +12,6 @@ data class DayForecast(
     @Json(name = "dt") val date: Long,
     val sunrise: Long,
     val sunset: Long,
-    val weather: List<WeatherCondition>
+    val weather: List<WeatherCondition>,
+    val speed: Float
 ) : Parcelable

@@ -11,14 +11,14 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class MyAdapter(private val data: List<DayForecast>) :
+class MyAdapter(private val data: List<DayForecast>, private val itemClickListener: OnItemClickListener) :
     RecyclerView.Adapter<MyAdapter.RowDateViewHolder>() {
 
     inner class RowDateViewHolder(private val binding: RowDateBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("NewApi")
-        fun bind(data: DayForecast) {
+        fun bind(data: DayForecast, clickListener: OnItemClickListener) {
 
             val instant = Instant.ofEpochSecond(data.date)
             val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
@@ -50,6 +50,9 @@ class MyAdapter(private val data: List<DayForecast>) :
                     .into(binding.sunIcon)
 
             }
+            itemView.setOnClickListener {
+                clickListener.onItemClicked(data)
+            }
         }
     }
 
@@ -60,8 +63,12 @@ class MyAdapter(private val data: List<DayForecast>) :
     }
 
     override fun onBindViewHolder(holder: RowDateViewHolder, position: Int) {
-        holder.bind(data[position])
+        data[position]
+        holder.bind(data[position], itemClickListener)
     }
 
     override fun getItemCount() = data.size
+    interface OnItemClickListener{
+        fun onItemClicked(data: DayForecast)
+    }
 }
